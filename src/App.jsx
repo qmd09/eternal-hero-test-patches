@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Routes, Route, useParams, Navigate } from 'react-router-dom'
-import { loadPatches, savePatches, NAME_KEY } from './utils'
+import { loadPatches, savePatches, NAME_KEY, isPrivileged } from './utils'
 import NameScreen from './components/NameScreen'
 import Home from './components/Home'
 import AdminHome from './components/AdminHome'
@@ -60,9 +60,11 @@ export default function App() {
       <Route path="/" element={<Home patches={patches} testerName={testerName} onChangeName={handleChangeName} />} />
       <Route path="/patch/:id" element={<PatchRoute patches={patches} onSave={handleSave} testerName={testerName} onChangeName={handleChangeName} />} />
       <Route path="/patch/:id/damage" element={<DamageRouteWrapper patches={patches} onSave={handleSave} testerName={testerName} onChangeName={handleChangeName} isAdmin={false} />} />
-      <Route path="/admin/patch/:id/damage" element={<DamageRouteWrapper patches={patches} onSave={handleSave} testerName={testerName} onChangeName={handleChangeName} isAdmin={true} />} />
-      <Route path="/admin" element={<AdminHome patches={patches} onSave={handleSave} testerName={testerName} onChangeName={handleChangeName} />} />
-      <Route path="/admin/patch/:id" element={<AdminPatchRoute patches={patches} onSave={handleSave} testerName={testerName} onChangeName={handleChangeName} />} />
+      <Route path="/admin/patch/:id/damage" element={isPrivileged(testerName) ? <DamageRouteWrapper patches={patches} onSave={handleSave} testerName={testerName} onChangeName={handleChangeName} isAdmin={true} /> : <Navigate to="/" />} />
+      {/* Admin routes require a privileged tester name. Redirects non-privileged
+          users to home rather than showing a blank or broken admin view. */}
+      <Route path="/admin" element={isPrivileged(testerName) ? <AdminHome patches={patches} onSave={handleSave} testerName={testerName} onChangeName={handleChangeName} /> : <Navigate to="/" />} />
+      <Route path="/admin/patch/:id" element={isPrivileged(testerName) ? <AdminPatchRoute patches={patches} onSave={handleSave} testerName={testerName} onChangeName={handleChangeName} /> : <Navigate to="/" />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
     </>

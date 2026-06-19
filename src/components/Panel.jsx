@@ -467,9 +467,12 @@ export default function Panel({ sel, selType, parentChange, testerName, isAdmin,
           </span>
         </div>
         {(() => {
-          const visible = activeTagFilter ? comments.filter(cm => cm.tag === activeTagFilter) : comments
+          const searchLower = search.trim().toLowerCase()
+          const visible = comments
+            .filter(cm => !activeTagFilter || cm.tag === activeTagFilter)
+            .filter(cm => !searchLower || cm.text?.toLowerCase().includes(searchLower))
           return visible.length === 0
-            ? <div style={{ fontSize: 13, color: 'var(--text2)' }}>{comments.length === 0 ? 'No comments yet.' : 'No comments with this tag.'}</div>
+            ? <div style={{ fontSize: 13, color: 'var(--text2)' }}>{comments.length === 0 ? 'No comments yet.' : searchLower ? 'No comments match your search.' : 'No comments with this tag.'}</div>
             : visible.map(cm => (
               <CommentBubble key={cm.id} cm={cm} testerName={testerName} isAdmin={isAdmin}
                 depth={0}
